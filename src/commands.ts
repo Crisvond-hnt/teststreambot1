@@ -6,8 +6,8 @@ const commands = [
         description: 'Get help with bot commands',
     },
     {
-        name: 'time',
-        description: 'Get the current time',
+        name: 'price',
+        description: 'Check cryptocurrency price with spicy commentary',
     },
 ] as const satisfies PlainMessage<SlashCommand>[]
 
