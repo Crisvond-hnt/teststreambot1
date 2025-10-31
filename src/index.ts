@@ -75,15 +75,31 @@ function getSarcasticComment(change24h: number, cryptoName: string): string {
 
 async function getCryptoPrice(cryptoId: string): Promise<string> {
     try {
-        const response = await fetch(
-            `https://api.coingecko.com/api/v3/simple/price?ids=${cryptoId}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true`
-        )
+        const url = `https://api.coingecko.com/api/v3/simple/price?ids=${cryptoId}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true`
+        console.log(`🔍 Fetching price for: ${cryptoId}`)
+        console.log(`📡 URL: ${url}`)
+        
+        const response = await fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+            }
+        })
+        
+        console.log(`📊 Response status: ${response.status}`)
         
         if (!response.ok) {
-            return `❌ Unable to fetch price data. Please check the cryptocurrency name.`
+            const errorText = await response.text()
+            console.error(`❌ API Error (${response.status}):`, errorText)
+            
+            if (response.status === 429) {
+                return `⏳ Rate limit exceeded! CoinGecko API is cooling down. Try again in a minute.\n\n💡 Tip: The free API has limits, so be patient!`
+            }
+            
+            return `❌ Unable to fetch price data (Status: ${response.status}). Please try again later.`
         }
         
         const data = await response.json()
+        console.log('📦 API Response:', JSON.stringify(data))
         
         if (!data[cryptoId]) {
             return `❌ Cryptocurrency "${cryptoId}" not found. Try using the full name like "ethereum", "bitcoin", "cardano", etc.`
@@ -104,7 +120,8 @@ async function getCryptoPrice(cryptoId: string): Promise<string> {
                `💰 **Market Cap:** $${(marketCap / 1_000_000_000).toFixed(2)}B\n\n` +
                `${sarcasticComment}`
     } catch (error) {
-        return `❌ Error fetching crypto price. Please try again later.`
+        console.error('💥 Error in getCryptoPrice:', error)
+        return `❌ Error fetching crypto price: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again later.`
     }
 }
 
