@@ -131,16 +131,17 @@ bot.onSlashCommand('help', async (handler, { channelId }) => {
         '**Crypto Price Bot** 💰🤡\n\n' +
             '**Available Commands:**\n\n' +
             '• `/help` - Show this help message\n' +
-            '• `/price <crypto>` - Check cryptocurrency price (with spicy commentary)\n\n' +
+            '• `/price <crypto>` - Check cryptocurrency price (with spicy commentary)\n' +
+            '• `/foolsgold` - Get a random trending meme coin (probably a rug pull)\n\n' +
             '**Examples:**\n' +
             '• `/price ethereum`\n' +
             '• `/price bitcoin`\n' +
-            '• `/price cardano`\n' +
-            '• `/price solana`\n\n' +
+            '• `/foolsgold` - Feel like gambling?\n\n' +
             '**What to Expect:**\n' +
             '📈 Green days = Celebration time!\n' +
             '📉 Red days = Savage roasting 🔥\n' +
-            '💀 Big dumps = Maximum sarcasm unlocked\n\n' +
+            '💀 Big dumps = Maximum sarcasm unlocked\n' +
+            '🎰 Fool\'s Gold = Maximum degeneracy 🤡\n\n' +
             '**Supported Cryptocurrencies:**\n' +
             'Bitcoin, Ethereum, Cardano, Solana, Polygon, Avalanche, Chainlink, Dogecoin, and many more!\n\n' +
             '⚠️ *Not financial advice. Bot is just here for the memes.*'
@@ -159,6 +160,89 @@ bot.onSlashCommand('price', async (handler, { channelId, args }) => {
     const cryptoId = args[0].toLowerCase()
     const priceInfo = await getCryptoPrice(cryptoId)
     await handler.sendMessage(channelId, priceInfo)
+})
+
+async function getFoolsGold(): Promise<string> {
+    try {
+        console.log('🎰 Fetching trending meme coins...')
+        
+        // Get trending coins from CoinGecko
+        const response = await fetch('https://api.coingecko.com/api/v3/search/trending', {
+            headers: {
+                'Accept': 'application/json',
+            }
+        })
+        
+        if (!response.ok) {
+            console.error(`❌ Trending API Error: ${response.status}`)
+            return '❌ Failed to fetch trending coins. Even the API doesn\'t want you to throw away your money!'
+        }
+        
+        const data = await response.json()
+        console.log('📦 Trending data received')
+        
+        if (!data.coins || data.coins.length === 0) {
+            return '🤷 No trending meme coins found. That\'s probably a good thing for your wallet!'
+        }
+        
+        // Pick a random trending coin
+        const randomIndex = Math.floor(Math.random() * data.coins.length)
+        const coin = data.coins[randomIndex].item
+        
+        // Generate sarcastic warnings
+        const warnings = [
+            '⚠️ **WARNING:** This is probably a rug pull waiting to happen!',
+            '🚨 **DANGER:** Your money is about to go on vacation... permanently!',
+            '💀 **ALERT:** The devs are probably laughing at you right now!',
+            '🤡 **NOTICE:** Congratulations on your future loss!',
+            '🎪 **ADVISORY:** Welcome to the circus, you beautiful fool!',
+            '💩 **CAUTION:** This coin smells fishier than a seafood market!',
+            '🪦 **DISCLAIMER:** RIP to your savings in advance!',
+            '🔥 **WARNING:** This is fine. Everything is fine. (It\'s not fine.)',
+        ]
+        
+        const disclaimer = warnings[Math.floor(Math.random() * warnings.length)]
+        
+        // Get additional coin details
+        const rank = coin.market_cap_rank || 'Unknown'
+        const price = coin.data?.price ? `$${parseFloat(coin.data.price).toFixed(8)}` : 'Unknown'
+        
+        // Build the message
+        let message = `🎰 **FOOL'S GOLD SPECIAL** 🎰\n\n`
+        message += `**${coin.name}** (${coin.symbol})\n\n`
+        message += `💰 **Price:** ${price}\n`
+        message += `📊 **Market Cap Rank:** #${rank}\n`
+        message += `🔥 **Status:** TRENDING 🚀\n\n`
+        message += `${disclaimer}\n\n`
+        message += `💡 **"Financial Advice":**\n`
+        
+        // Random bad advice
+        const advice = [
+            'YOLO your life savings! What could go wrong? 😎',
+            'Max out your credit cards! The moon awaits! 🌙',
+            'Sell your house! Diamond hands baby! 💎',
+            'Tell your spouse it\'s an "investment"! 🤥',
+            'Take out a loan! Generational wealth incoming! 💸',
+            'Skip paying rent! Lambos are more important! 🏎️',
+            'Your kids don\'t need college anyway! 🎓❌',
+            'Beans and rice taste great! Who needs food variety? 🍚',
+        ]
+        
+        message += advice[Math.floor(Math.random() * advice.length)]
+        message += '\n\n'
+        message += '⚠️ *This is satire. Not financial advice. Please don\'t actually do this. Seriously.*'
+        
+        return message
+        
+    } catch (error) {
+        console.error('💥 Error in getFoolsGold:', error)
+        return '❌ Failed to find fool\'s gold. Consider this a sign from the universe to keep your money!'
+    }
+}
+
+bot.onSlashCommand('foolsgold', async (handler, { channelId }) => {
+    const foolsGoldPick = await getFoolsGold()
+    await handler.sendMessage(channelId, foolsGoldPick)
 })
 
 // Server setup
